@@ -1,0 +1,90 @@
+services:
+  kong:
+    image: kong:${KONG_VERSION}
+    container_name: kong
+    expose:
+      - 8005
+      - 8006
+      - 8444
+      - 8443
+    environment:
+      KONG_DATABASE: postgres
+      KONG_PG_HOST: kong_db
+      KONG_PG_PORT: 5432
+      KONG_PG_DATABASE: kong
+      KONG_PROXY_ACCESS_LOG: /dev/stdout
+      KONG_ADMIN_ACCESS_LOG: /dev/stdout
+      KONG_PROXY_ERROR_LOG: /dev/stderr
+      KONG_ADMIN_ERROR_LOG: /dev/stderr
+      KONG_PROXY_LISTEN: "0.0.0.0:8005, 0.0.0.0:8443 ssl"
+      KONG_ADMIN_LISTEN: "0.0.0.0:8006, 0.0.0.0:8444 ssl"
+      KONG_PLUGINS: "basic-auth, key-auth, rate-limiting, prometheus, proxy-cache, oauth2"
+    networks:
+      - webproxy
+      - default
+    depends_on:
+      - kong_db
+      - kong_migration
+    restart: unless-stopped
+
+  kong_db:
+    image: postgres:${KONG_DB_VERSION}
+    container_name: kong_db
+    volumes:
+      - kong_datastore:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: kong
+      POSTGRES_USER: kong
+      POSTGRES_HOST_AUTH_METHOD: trust
+    restart: unless-stopped
+
+  kong_migration:
+    image: kong:${KONG_VERSION}
+    container_name: kong_migration
+    command: "kong migrations bootstrap"
+    environment:
+      KONG_PG_HOST: kong_db
+    depends_on:
+      - kong_db
+    restart: on-failure
+
+  konga:
+    image: pantsel/konga:${KONGA_VERSION}
+    container_name: konga
+    ports:
+      - 1337:1337
+    environment:
+      DB_ADAPTER: postgres
+      DB_HOST: konga_db
+      DB_USER: konga
+      DB_DATABASE: konga
+      NODE_ENV: development
+    networks:
+      - webproxy
+      - default
+    depends_on:
+      - konga_db
+    restart: unless-stopped
+
+  konga_db:
+    image: postgres:${KONGA_DB_VERSION}
+    container_name: konga_db
+    volumes:
+      - konga_database:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: konga
+      POSTGRES_USER: konga
+      POSTGRES_HOST_AUTH_METHOD: trust
+    restart: unless-stopped
+
+networks:
+  webproxy:
+    external:
+      name: webproxy
+  default:
+    external:
+      name: kong_network
+
+volumes:
+  kong_datastore:
+  konga_database:

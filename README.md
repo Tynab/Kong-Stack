@@ -1,2 +1,2 @@
-# Kong-Stack
- Kong stack
+# KONG STACK
+Kong Gateway with Docker Compose.
