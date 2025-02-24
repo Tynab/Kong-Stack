@@ -8,14 +8,14 @@ services:
       - 8444
       - 8443
     environment:
-      KONG_DATABASE: postgres
-      KONG_PG_HOST: kong_db
-      KONG_PG_PORT: 5432
-      KONG_PG_DATABASE: kong
-      KONG_PROXY_ACCESS_LOG: /dev/stdout
-      KONG_ADMIN_ACCESS_LOG: /dev/stdout
-      KONG_PROXY_ERROR_LOG: /dev/stderr
-      KONG_ADMIN_ERROR_LOG: /dev/stderr
+      KONG_DATABASE: "postgres"
+      KONG_PG_HOST: "kong_db"
+      KONG_PG_PORT: "5432"
+      KONG_PG_DATABASE: "kong"
+      KONG_PROXY_ACCESS_LOG: "/dev/stdout"
+      KONG_ADMIN_ACCESS_LOG: "/dev/stdout"
+      KONG_PROXY_ERROR_LOG: "/dev/stderr"
+      KONG_ADMIN_ERROR_LOG: "/dev/stderr"
       KONG_PROXY_LISTEN: "0.0.0.0:8005, 0.0.0.0:8443 ssl"
       KONG_ADMIN_LISTEN: "0.0.0.0:8006, 0.0.0.0:8444 ssl"
       KONG_PLUGINS: "basic-auth, key-auth, rate-limiting, prometheus, proxy-cache, oauth2"
@@ -33,9 +33,9 @@ services:
     volumes:
       - kong_datastore:/var/lib/postgresql/data
     environment:
-      POSTGRES_DB: kong
-      POSTGRES_USER: kong
-      POSTGRES_HOST_AUTH_METHOD: trust
+      POSTGRES_DB: "kong"
+      POSTGRES_USER: "kong"
+      POSTGRES_HOST_AUTH_METHOD: "trust"
     restart: unless-stopped
 
   kong_migration:
@@ -43,7 +43,7 @@ services:
     container_name: kong_migration
     command: "kong migrations bootstrap"
     environment:
-      KONG_PG_HOST: kong_db
+      KONG_PG_HOST: "kong_db"
     depends_on:
       - kong_db
     restart: on-failure
@@ -54,11 +54,11 @@ services:
     ports:
       - 1337:1337
     environment:
-      DB_ADAPTER: postgres
-      DB_HOST: konga_db
-      DB_USER: konga
-      DB_DATABASE: konga
-      NODE_ENV: development
+      DB_ADAPTER: "postgres"
+      DB_HOST: "konga_db"
+      DB_USER: "konga"
+      DB_DATABASE: "konga"
+      NODE_ENV: "development"
     networks:
       - webproxy
       - default
@@ -72,9 +72,9 @@ services:
     volumes:
       - konga_database:/var/lib/postgresql/data
     environment:
-      POSTGRES_DB: konga
-      POSTGRES_USER: konga
-      POSTGRES_HOST_AUTH_METHOD: trust
+      POSTGRES_DB: "konga"
+      POSTGRES_USER: "konga"
+      POSTGRES_HOST_AUTH_METHOD: "trust"
     restart: unless-stopped
 
 networks:
